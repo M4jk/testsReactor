@@ -165,5 +165,17 @@ public class AtmMachineTest {
         payment = atmMachine.withdraw(money, card);
     }
 
+    @Test
+    public void shouldCallChargeThreeTimes() {
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, money)).thenReturn(true);
+        when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
+
+        atmMachine.withdraw(money, card);
+        atmMachine.withdraw(money, card);
+        atmMachine.withdraw(money, card);
+
+        verify(bankService, times(3)).charge(authenticationToken, money);
+    }
 
 }
