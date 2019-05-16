@@ -94,7 +94,7 @@ public class AtmMachineTest {
         when(bankService.charge(authenticationToken, money)).thenReturn(true);
         when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
 
-        Payment payment = atmMachine.withdraw(money, card);
+        payment = atmMachine.withdraw(money, card);
 
         List<Banknote> expectedBanknotesList = new ArrayList<>();
         expectedBanknotesList.add(Banknote.PL100);
@@ -148,13 +148,21 @@ public class AtmMachineTest {
         when(bankService.charge(authenticationToken, money)).thenReturn(true);
         when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
 
-        Payment payment = atmMachine.withdraw(money, card);
+        payment = atmMachine.withdraw(money, card);
 
         List<Banknote> expectedBanknotesList = new ArrayList<>();
         expectedBanknotesList.add(Banknote.EU10);
         expectedBanknotesList.add(Banknote.EU100);
 
         assertThat(payment.getValue(), is(expectedBanknotesList));
+    }
+
+    @Test(expected = MoneyDepotException.class)
+    public void shouldThrowMoneyDepotException() {
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, money)).thenReturn(true);
+
+        payment = atmMachine.withdraw(money, card);
     }
 
 
