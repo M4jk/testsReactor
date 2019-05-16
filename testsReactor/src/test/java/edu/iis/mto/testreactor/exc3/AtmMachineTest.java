@@ -2,8 +2,7 @@ package edu.iis.mto.testreactor.exc3;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -116,6 +115,32 @@ public class AtmMachineTest {
         list.add(Banknote.PL100);
 
         assertThat(payment.getValue(), is(list));
+    }
+
+    @Test
+    public void shouldCallCommitOnce() {
+        money = Money.builder()
+                     .withAmount(100)
+                     .withCurrency(Currency.PL)
+                     .build();
+
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        authenticationToken = AuthenticationToken.builder()
+                                                 .withUserId("numer")
+                                                 .withAuthorizationCode(11)
+                                                 .build();
+
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, money)).thenReturn(true);
+        when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
+
+        atmMachine.withdraw(money, card);
+
+        verify(bankService, times(1)).commit(authenticationToken);
     }
 
 
