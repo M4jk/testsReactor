@@ -33,6 +33,21 @@ public class AtmMachineTest {
         cardService = mock(CardProviderService.class);
         moneyDepot = mock(MoneyDepot.class);
 
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        authenticationToken = AuthenticationToken.builder()
+                                                 .withUserId("numer")
+                                                 .withAuthorizationCode(1)
+                                                 .build();
+
+        money = Money.builder()
+                     .withAmount(100)
+                     .withCurrency(Currency.PL)
+                     .build();
+
         atmMachine = new AtmMachine(cardService, bankService, moneyDepot);
     }
 
@@ -48,11 +63,6 @@ public class AtmMachineTest {
                 .withCurrency(Currency.PL)
                 .build();
 
-        card = Card.builder()
-                .withCardNumber("numer")
-                .withPinNumber(1)
-                .build();
-
         atmMachine.withdraw(money, card);
     }
 
@@ -62,11 +72,6 @@ public class AtmMachineTest {
                      .withAmount(1)
                      .withCurrency(Currency.PL)
                      .build();
-
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
 
         atmMachine.withdraw(money, card);
     }
@@ -78,11 +83,6 @@ public class AtmMachineTest {
                      .withCurrency(Currency.PL)
                      .build();
 
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
-
         when(cardService.authorize(card)).thenReturn(Optional.empty());
 
         atmMachine.withdraw(money, card);
@@ -90,21 +90,6 @@ public class AtmMachineTest {
 
     @Test
     public void shouldReturn100PLBanknote() {
-        money = Money.builder()
-                     .withAmount(100)
-                     .withCurrency(Currency.PL)
-                     .build();
-
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
-
-        authenticationToken = AuthenticationToken.builder()
-                                                 .withUserId("numer")
-                                                 .withAuthorizationCode(1)
-                                                 .build();
-
         when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
         when(bankService.charge(authenticationToken, money)).thenReturn(true);
         when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
@@ -119,21 +104,6 @@ public class AtmMachineTest {
 
     @Test
     public void shouldCallCommitOnce() {
-        money = Money.builder()
-                     .withAmount(100)
-                     .withCurrency(Currency.PL)
-                     .build();
-
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
-
-        authenticationToken = AuthenticationToken.builder()
-                                                 .withUserId("numer")
-                                                 .withAuthorizationCode(11)
-                                                 .build();
-
         when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
         when(bankService.charge(authenticationToken, money)).thenReturn(true);
         when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
@@ -145,21 +115,6 @@ public class AtmMachineTest {
 
     @Test
     public void shouldCallStartOnce() {
-        money = Money.builder()
-                     .withAmount(100)
-                     .withCurrency(Currency.PL)
-                     .build();
-
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
-
-        authenticationToken = AuthenticationToken.builder()
-                                                 .withUserId("numer")
-                                                 .withAuthorizationCode(11)
-                                                 .build();
-
         when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
         when(bankService.charge(authenticationToken, money)).thenReturn(true);
         when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
@@ -171,25 +126,10 @@ public class AtmMachineTest {
 
     @Test(expected = InsufficientFundsException.class)
     public void shouldThrowInsufficientFundsExceptionIfMoneyToChargeIsBiggerThenOnAccount() {
-        money = Money.builder()
-                     .withAmount(100)
-                     .withCurrency(Currency.PL)
-                     .build();
-
         Money moneyToCharge = Money.builder()
                                    .withAmount(110)
                                    .withCurrency(Currency.PL)
                                    .build();
-
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
-
-        authenticationToken = AuthenticationToken.builder()
-                                                 .withUserId("numer")
-                                                 .withAuthorizationCode(11)
-                                                 .build();
 
         when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
         when(bankService.charge(authenticationToken, moneyToCharge)).thenReturn(false);
@@ -203,16 +143,6 @@ public class AtmMachineTest {
                      .withAmount(110)
                      .withCurrency(Currency.EU)
                      .build();
-
-        card = Card.builder()
-                   .withCardNumber("numer")
-                   .withPinNumber(1)
-                   .build();
-
-        authenticationToken = AuthenticationToken.builder()
-                                                 .withUserId("numer")
-                                                 .withAuthorizationCode(1)
-                                                 .build();
 
         when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
         when(bankService.charge(authenticationToken, money)).thenReturn(true);
