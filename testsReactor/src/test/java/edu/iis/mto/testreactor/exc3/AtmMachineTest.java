@@ -1,14 +1,15 @@
 package edu.iis.mto.testreactor.exc3;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -86,6 +87,35 @@ public class AtmMachineTest {
         when(cardService.authorize(card)).thenReturn(Optional.empty());
 
         atmMachine.withdraw(money, card);
+    }
+
+    @Test
+    public void shouldReturn100PLBanknote() {
+        money = Money.builder()
+                     .withAmount(100)
+                     .withCurrency(Currency.PL)
+                     .build();
+
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        authenticationToken = AuthenticationToken.builder()
+                                                 .withUserId("numer")
+                                                 .withAuthorizationCode(1)
+                                                 .build();
+
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, money)).thenReturn(true);
+        when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
+
+        Payment payment = atmMachine.withdraw(money, card);
+
+        List<Banknote> list = new ArrayList<>();
+        list.add(Banknote.PL100);
+
+        assertThat(payment.getValue(), is(list));
     }
 
 
