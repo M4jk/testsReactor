@@ -169,5 +169,33 @@ public class AtmMachineTest {
         verify(bankService, times(1)).startTransaction(authenticationToken);
     }
 
+    @Test(expected = InsufficientFundsException.class)
+    public void shouldThrowInsufficientFundsExceptionIfMoneyToChargeIsBiggerThenOnAccount() {
+        money = Money.builder()
+                     .withAmount(100)
+                     .withCurrency(Currency.PL)
+                     .build();
+
+        Money moneyToCharge = Money.builder()
+                                   .withAmount(110)
+                                   .withCurrency(Currency.PL)
+                                   .build();
+
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        authenticationToken = AuthenticationToken.builder()
+                                                 .withUserId("numer")
+                                                 .withAuthorizationCode(11)
+                                                 .build();
+
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, moneyToCharge)).thenReturn(false);
+
+        atmMachine.withdraw(money, card);
+    }
+
 
 }
