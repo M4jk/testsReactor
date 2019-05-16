@@ -111,10 +111,10 @@ public class AtmMachineTest {
 
         Payment payment = atmMachine.withdraw(money, card);
 
-        List<Banknote> list = new ArrayList<>();
-        list.add(Banknote.PL100);
+        List<Banknote> expectedBanknotesList = new ArrayList<>();
+        expectedBanknotesList.add(Banknote.PL100);
 
-        assertThat(payment.getValue(), is(list));
+        assertThat(payment.getValue(), is(expectedBanknotesList));
     }
 
     @Test
@@ -195,6 +195,36 @@ public class AtmMachineTest {
         when(bankService.charge(authenticationToken, moneyToCharge)).thenReturn(false);
 
         atmMachine.withdraw(money, card);
+    }
+
+    @Test
+    public void shouldReturn110EUInBanknotes() {
+        money = Money.builder()
+                     .withAmount(110)
+                     .withCurrency(Currency.EU)
+                     .build();
+
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        authenticationToken = AuthenticationToken.builder()
+                                                 .withUserId("numer")
+                                                 .withAuthorizationCode(1)
+                                                 .build();
+
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, money)).thenReturn(true);
+        when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
+
+        Payment payment = atmMachine.withdraw(money, card);
+
+        List<Banknote> expectedBanknotesList = new ArrayList<>();
+        expectedBanknotesList.add(Banknote.EU10);
+        expectedBanknotesList.add(Banknote.EU100);
+
+        assertThat(payment.getValue(), is(expectedBanknotesList));
     }
 
 
