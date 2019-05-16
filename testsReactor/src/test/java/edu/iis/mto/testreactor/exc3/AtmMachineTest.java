@@ -9,6 +9,10 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 public class AtmMachineTest {
 
     private CardProviderService cardService;
@@ -63,6 +67,23 @@ public class AtmMachineTest {
                    .withCardNumber("numer")
                    .withPinNumber(1)
                    .build();
+
+        atmMachine.withdraw(money, card);
+    }
+
+    @Test(expected = CardAuthorizationException.class)
+    public void shouldThrowCardAuthorizationExceptionWhenAuthorizationCodeIsWrong() {
+        money = Money.builder()
+                     .withAmount(10)
+                     .withCurrency(Currency.PL)
+                     .build();
+
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        when(cardService.authorize(card)).thenReturn(Optional.empty());
 
         atmMachine.withdraw(money, card);
     }
