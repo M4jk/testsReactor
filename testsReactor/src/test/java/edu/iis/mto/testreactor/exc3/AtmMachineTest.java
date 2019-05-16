@@ -143,5 +143,31 @@ public class AtmMachineTest {
         verify(bankService, times(1)).commit(authenticationToken);
     }
 
+    @Test
+    public void shouldCallStartOnce() {
+        money = Money.builder()
+                     .withAmount(100)
+                     .withCurrency(Currency.PL)
+                     .build();
+
+        card = Card.builder()
+                   .withCardNumber("numer")
+                   .withPinNumber(1)
+                   .build();
+
+        authenticationToken = AuthenticationToken.builder()
+                                                 .withUserId("numer")
+                                                 .withAuthorizationCode(11)
+                                                 .build();
+
+        when(cardService.authorize(card)).thenReturn(Optional.ofNullable(authenticationToken));
+        when(bankService.charge(authenticationToken, money)).thenReturn(true);
+        when(moneyDepot.releaseBanknotes(Matchers.anyList())).thenReturn(true);
+
+        atmMachine.withdraw(money, card);
+
+        verify(bankService, times(1)).startTransaction(authenticationToken);
+    }
+
 
 }
